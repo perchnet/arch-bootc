@@ -39,17 +39,23 @@ jobs:
       - name: Checkout
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
 
-      - name: Install just
-        id: install_just
-        run: sudo bash -c 'apt-get update && apt-get -y install just'
-
       - name: Build containerfile
         id: build_containerfile
-        run: just build-containerfile
+        run: sudo podman build -t "${{ github.event.repository.name }}:latest" .
 
       - name: Generate bootable image
         id: generate_bootable_image
-        run: just generate-bootable-image
+        run: |
+            fallocate -l 20G "./bootable.img"
+            sudo podman run \
+                --rm --privileged --pid=host \
+                -it \
+                -v /etc/containers:/etc/containers \
+                -v /var/lib/containers:/var/lib/containers \
+                -v /dev:/dev \
+                -e RUST_LOG=debug \
+                -v "./:/data" \
+                "${{ github.event.repository.name }}:latest" bootc install to-disk --composefs-backend --via-loopback /data/bootable.img --filesystem "ext4" --wipe --bootloader systemd
 
       - name: Compress bootable image
         id: compress_bootable_image
