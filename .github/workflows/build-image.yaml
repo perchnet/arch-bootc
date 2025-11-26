@@ -57,13 +57,13 @@ jobs:
                 -v "./:/data" \
                 "${{ github.event.repository.name }}:latest" bootc install to-disk --composefs-backend --via-loopback /data/bootable.img --filesystem "ext4" --wipe --bootloader systemd
 
-      - name: Compress bootable image
-        id: compress_bootable_image
-        run: tar -czvf bootable.tgz bootable.img
+      #- name: Compress bootable image
+      #  id: compress_bootable_image
+      #  run: tar -czvf bootable.tgz bootable.img
 
       - uses: actions/upload-artifact@v4
         with:
-          name: bootable.tgz
-          path: bootable.tgz
+          name: bootable.img
+          path: bootable.img
 
 
